@@ -123,12 +123,17 @@ String build_payload() {
   json["watios"] = String(rmsPower);
   json["kwh"] = String(kiloWattHours);
   json["beforeKwh"] = String(beforeResetKiloWattHours);
+  #ifdef MOTION
+  json["motion"] = String(motionAverage);
+  json["temperature"] = String(temperature);
+  #endif
   json["ical"] = String(Ical);
   json["mqttreconnected"] = String(reconnected_count);
   json["wifidb"] = rssi;
   json["uptime"] = NTP.getUptimeString ();
   json["time"] = NTP.getTimeDateString();
   json["freemem"] = ESP.getFreeHeap();
+  json["version"] = String(VERSION);
 
   serializeJson(json, jsonString);
 
@@ -139,9 +144,11 @@ String build_payload() {
 void initSerial() {
 
   Serial.begin(115200);
+  delay(500);
   Serial.println("");
   Serial.println("");
-  Serial.println("* Starting up *");
+  Serial.print("* Starting up *");
+  Serial.println(VERSION);
 }
 
 void prepareHostMacAndEvents() {
@@ -200,8 +207,11 @@ void setupWifi() {
   wifiManager.setConfigPortalTimeout(180);
   wifiManager.setConnectTimeout(60);
   Serial.println(" Wifi " + wifi_hostname + ", password " + system_password);
-  wifiManager.autoConnect(wifi_hostname.c_str(), system_password.c_str());
-
+  if (system_password.length() > 0 ) {
+    wifiManager.autoConnect(wifi_hostname.c_str(), system_password.c_str());
+  } else {
+    wifiManager.autoConnect(wifi_hostname.c_str());
+  }
 
   if (isSTA() && ipMode == 1) {
     IPAddress ipa_ip, ipa_gateway, ipa_subnet;
@@ -278,9 +288,9 @@ void initMqtt() {
         connected = mqtt_client.connect(wifi_hostname.c_str(), mqtt_topic_status.c_str(), lwQoS, lwRetain, (char*)lwPayload.c_str());
     }
 
-
+    ++reconnected_count;
     if (connected) {
-        Serial.println(" MQTT Connected. ");
+        Serial.println("MQTT Connected. ");
         mqtt_client.subscribe((char *)mqtt_topic_subscribe.c_str());
         // Discover Notify Home Assistant
        // discoverHA();

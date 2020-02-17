@@ -31,6 +31,7 @@
 #include "iot_platforms_support.h"
 #include "power_meter_support.h"
 #include "webserver_support.h"
+#include "MPU6050_motion.h"
 
 // Initial setup
 void setup(void) {
@@ -48,7 +49,7 @@ void setup(void) {
 
   setupWifi();
 
-  emon.current(A0, Ical);             // Current: input pin A6=D4, calibration factor
+  // emon.current(A0, Ical);             // Current: input pin A6=D4, calibration factor
 
   initMqtt();
 
@@ -64,9 +65,15 @@ void setup(void) {
 
   setupOTA();
 
+  #ifdef MOTION
+  setupMPU6050();
+  #endif
+
   emon.current(A0, Ical);
   em_read(true);
 
+  lastMsgMQTT = millis();
+  lastEMRead = millis();
   Serial.println("Setup finished");
 } // End of setup
 
@@ -77,6 +84,10 @@ void loop() {
   ArduinoOTA.handle();
 
   ntp_loop();
+
+  #ifdef MOTION
+  loopMPU6050();
+  #endif
 
   em_loop();
 
