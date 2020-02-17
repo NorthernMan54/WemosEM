@@ -193,8 +193,11 @@ In my use case, I used the current sensor for the Washer, and added a MPU 6050 A
 #### Rebuilding web package
 
 1 - Install GULP package ( npm install -g gulp )
+
 2 - cd ~/Code/WemosEM/WemosEM-Mqtt-Power-Sensor
+
 3 - npm install
+
 4 - ~/npm/bin/gulp
 
 #### Node-Red Flow
@@ -204,7 +207,9 @@ In my use case, I used the current sensor for the Washer, and added a MPU 6050 A
 You need to update these node's for your Configuration
 
 1 - Washer/Dryer - Update MQTT topic to match your device
+
 2 - Alarm Function node - Update line 3 for the turn on value and line 7 for the turn off value ).  These values are based on the average of the last 24 messages received.
+
 3 - Washer/Dryer in Use - Update to match your HomeKit environment
 
 
